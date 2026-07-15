@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador de Horário Escolar - Completo com Diagnóstico & Impressão</title>
     
-    <!-- Bibliotecas Originais -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
-    <!-- Novas Bibliotecas para Geração do PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
@@ -77,12 +74,19 @@
         .btn-warning { background-color: #d97706; padding: 10px; width: auto; font-size: 0.85rem; }
         .btn-warning:hover { background-color: #b45309; }
 
+        /* Estilos dos novos botões de exportação editável */
+        .btn-csv { background-color: #f59e0b; color: white; font-size: 0.95rem; }
+        .btn-csv:hover { background-color: #d97706; }
+        .btn-doc { background-color: #3b82f6; color: white; font-size: 0.95rem; }
+        .btn-doc:hover { background-color: #2563eb; }
+
         .list-item { padding: 12px; background: #f8fafc; margin-bottom: 8px; border-radius: 8px; font-size: 0.85rem; position: relative; border: 1px solid #e2e8f0; border-left: 5px solid var(--primary); }
         .list-item .remove-btn { position: absolute; top: 12px; right: 12px; background: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; width: auto; font-size: 0.75rem;}
-        .workload-tag { display: inline-block; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin: 2px; border: 1px solid #cbd5e1; }
+        .workload-tag { display: inline-flex; align-items: center; gap: 4px; background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700; margin: 2px; border: 1px solid #cbd5e1; }
         .fallback-icon { font-size: 0.85rem; margin-left: 3px; }
 
-        .actions-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        /* Ajustado para acomodar os novos botões */
+        .actions-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .output-section { margin-top: 30px; border: 2px solid #e2e8f0; background: #fff; }
         
         .visual-schedule-table { width: 100%; border-collapse: collapse; background: #ffffff; font-size: 0.8rem; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
@@ -152,7 +156,7 @@
 <div class="container">
     <header>
         <h1>📅 Gerador Escolar - Otimizado e Responsivo</h1>
-        <p>Geração com horários rígidos, contingência e limites customizados de alocação.</p>
+        <p>Geração com horários rígidos, contingência, prioridade docênte e limites customizados.</p>
     </header>
 
     <div class="card" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; background: #f5f3ff; border: 1px solid #ddd6fe;">
@@ -169,7 +173,6 @@
         <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
             <input type="file" id="excel-matrix-file" accept=".xlsx, .xls" style="padding: 8px; background: white; border: 1px solid #bbf7d0; border-radius: 6px;">
             <button type="button" style="background-color: #16a34a; width: auto; padding: 10px 22px;" onclick="importExactQuadroPessoal()">⚡ Extrair Dados e Turmas da Planilha</button>
-            <!-- NOVO BOTÃO PARA BAIXAR PLANILHA PADRÃO -->
             <button type="button" style="background-color: #059669; width: auto; padding: 10px 22px;" onclick="downloadStandardTemplate()">📥 Baixar Planilha Padrão</button>
         </div>
     </div>
@@ -263,9 +266,16 @@
         <!-- COLUNA DIREITA -->
         <div class="card">
             <h2>📝 2. Cadastro de Professores</h2>
-            <div class="form-group">
-                <label>Nome do Professor *</label>
-                <input type="text" id="prof-name" placeholder="Ex: Prof. Alexandre Silva">
+            
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+                <div class="form-group">
+                    <label>Nome do Professor *</label>
+                    <input type="text" id="prof-name" placeholder="Ex: Prof. Alexandre Silva">
+                </div>
+                <div class="form-group">
+                    <label>Prioridade (1 = Maior)</label>
+                    <input type="number" id="prof-priority" value="1" min="1" title="Defina a prioridade do professor. Número menor significa maior preferência.">
+                </div>
             </div>
 
             <div class="bulk-container">
@@ -280,15 +290,15 @@
                         <input type="number" id="bulk-qty" value="2" min="1">
                     </div>
                 </div>
-                <label style="font-weight: 800; font-size: 0.8rem; color: #1e40af; display: block; margin-bottom: 6px;">Turmas de Preferência (O sistema tentará estas primeiro):</label>
+                <label style="font-weight: 800; font-size: 0.8rem; color: #1e40af; display: block; margin-bottom: 6px;">Turmas de Preferência:</label>
                 <div id="bulk-classes-checkboxes" class="pref-flex" style="margin-bottom: 12px;"></div>
                 <button type="button" style="background-color: #2563eb;" onclick="addBulkWorkload()">➕ Adicionar Carga</button>
             </div>
 
             <div style="margin-bottom: 20px;">
-                <label style="font-weight: 800; font-size: 0.85rem; display: block; margin-bottom: 5px;">Carga Atual Deste Docente:</label>
+                <label style="font-weight: 800; font-size: 0.85rem; display: block; margin-bottom: 5px;">Carga Adicional (Na Fila deste Docente):</label>
                 <div id="temporary-workloads-summary" style="background: #fff; border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; min-height: 40px; font-size: 0.8rem;">
-                    <span style="color: #64748b; font-style: italic;">Nenhuma disciplina vinculada.</span>
+                    <span style="color: #64748b; font-style: italic;">Nenhuma disciplina extra na fila.</span>
                 </div>
             </div>
 
@@ -313,8 +323,12 @@
     <div class="card output-section">
         <h2>🚀 3. Processamento Final da Grade</h2>
         <div class="actions-panel no-print">
-            <button class="btn-success" onclick="generateSchedules()">⚡ Distribuir Aulas Respeitando Saídas</button>
-            <button class="btn-success" onclick="gerarPDFSecretaria()" style="background-color: #0284c7;">📄 Gerar Relatório Completo p/ Secretaria (PDF)</button>
+            <button class="btn-success" onclick="generateSchedules()" style="grid-column: 1 / -1; margin-bottom: 10px;">⚡ Distribuir Aulas Respeitando Saídas</button>
+            
+            <button class="btn-success" onclick="gerarPDFSecretaria()" style="background-color: #0284c7;">📄 PDF Turmas</button>
+            <button class="btn-success" onclick="gerarPDFTodosProfessores()" style="background-color: #16a34a;">👨‍🏫 PDF Docentes</button>
+            <button class="btn-success btn-csv" onclick="exportarCSV()">📊 Exportar CSV (Excel)</button>
+            <button class="btn-success btn-doc" onclick="exportarDOC()">📝 Exportar DOC (Word)</button>
         </div>
 
         <div id="results-container" style="display: none;">
@@ -407,12 +421,8 @@
     let activeClassInstances = []; 
     let currentEditingTeacherIndex = -1;
 
-    // ==========================================
-    // NOVA FUNÇÃO: BAIXAR TEMPLATE DA MATRIZ
-    // ==========================================
     function downloadStandardTemplate() {
         const wb = XLSX.utils.book_new();
-        // Modelo simplificado para guiar o usuário na criação da matriz_horarios.xlsx
         const wsData = [
             ["PROFESSOR", "DISCIPLINA", "6A", "6B", "7A", "TOTAL"],
             ["Prof. João Silva", "Matemática", 5, 5, 0, 10],
@@ -639,7 +649,7 @@
                     if(exist) exist.workloads.push(...cargas);
                     else {
                         let avail = {}; DAYS.forEach(day => avail[day] = TIME_SLOTS.filter(s => s.type === "aula").map(s => s.id));
-                        teachersDatabase.push({ name: profName, workloads: cargas, availability: avail });
+                        teachersDatabase.push({ name: profName, priority: 99, workloads: cargas, availability: avail });
                     }
                 }
             }
@@ -655,18 +665,51 @@
         if (!subject || qty <= 0) return alert("Parâmetros inválidos.");
         
         document.querySelectorAll(".bulk-class-cb:checked").forEach(cb => {
-            temporaryWorkloads.push({ classInstance: cb.value, subject: subject, weeklyLessons: qty });
+            let exists = temporaryWorkloads.find(w => w.classInstance === cb.value && w.subject === subject);
+            if (!exists) {
+                temporaryWorkloads.push({ classInstance: cb.value, subject: subject, weeklyLessons: qty });
+            }
             cb.checked = false;
         });
+        renderTemporaryWorkloadsUI();
+        document.getElementById("bulk-subject").value = ""; 
+    }
+
+    function editWorkload(idx) {
+        let wToEdit = temporaryWorkloads.splice(idx, 1)[0]; 
+        
+        const currentSubject = document.getElementById("bulk-subject").value.trim();
+        const currentQty = parseInt(document.getElementById("bulk-qty").value) || 0;
+        if (currentSubject && currentQty > 0) {
+            document.querySelectorAll(".bulk-class-cb:checked").forEach(cb => {
+                let exists = temporaryWorkloads.find(tw => tw.classInstance === cb.value && tw.subject === currentSubject);
+                if (!exists) {
+                    temporaryWorkloads.push({ classInstance: cb.value, subject: currentSubject, weeklyLessons: currentQty });
+                }
+            });
+        }
+        
+        document.getElementById("bulk-subject").value = wToEdit.subject;
+        document.getElementById("bulk-qty").value = wToEdit.weeklyLessons;
+        
+        document.querySelectorAll(".bulk-class-cb").forEach(cb => cb.checked = false);
+        let cbToSelect = document.querySelector(`.bulk-class-cb[value="${wToEdit.classInstance}"]`);
+        if(cbToSelect) cbToSelect.checked = true;
+        
         renderTemporaryWorkloadsUI();
     }
 
     function renderTemporaryWorkloadsUI() {
         const container = document.getElementById("temporary-workloads-summary");
-        if (temporaryWorkloads.length === 0) { container.innerHTML = "<span>Nenhuma.</span>"; return; }
+        if (temporaryWorkloads.length === 0) { container.innerHTML = "<span style='color: #64748b; font-style: italic;'>Nenhuma disciplina extra na fila.</span>"; return; }
         container.innerHTML = "";
         temporaryWorkloads.forEach((w, idx) => {
-            container.innerHTML += `<span class="workload-tag">${w.classInstance}: ${w.subject} (${w.weeklyLessons}h) <b onclick="temporaryWorkloads.splice(${idx},1); renderTemporaryWorkloadsUI();" style="color:red;cursor:pointer;padding-left:5px;">×</b></span>`;
+            container.innerHTML += `
+            <span class="workload-tag">
+                ${w.classInstance}: ${w.subject} (${w.weeklyLessons}h) 
+                <b onclick="editWorkload(${idx})" style="color:#0ea5e9; cursor:pointer; font-size:1rem; padding-left:4px;" title="Editar Carga">✏️</b>
+                <b onclick="temporaryWorkloads.splice(${idx},1); renderTemporaryWorkloadsUI();" style="color:red; cursor:pointer; font-size:1.1rem; padding-left:4px;" title="Remover">×</b>
+            </span>`;
         });
     }
 
@@ -692,7 +735,20 @@
 
     function addOrUpdateTeacher() {
         const name = document.getElementById("prof-name").value.trim();
+        const priority = parseInt(document.getElementById("prof-priority").value) || 99;
+
         if (!name) return alert("Nome obrigatório.");
+        
+        const subject = document.getElementById("bulk-subject").value.trim();
+        const qty = parseInt(document.getElementById("bulk-qty").value) || 0;
+        if (subject && qty > 0) {
+            document.querySelectorAll(".bulk-class-cb:checked").forEach(cb => {
+                let exists = temporaryWorkloads.find(w => w.classInstance === cb.value && w.subject === subject);
+                if (!exists) {
+                    temporaryWorkloads.push({ classInstance: cb.value, subject: subject, weeklyLessons: qty });
+                }
+            });
+        }
         
         let avail = {}; DAYS.forEach(d => avail[d] = []);
         document.querySelectorAll("#table-availability input[type='checkbox']:checked").forEach(cb => {
@@ -700,23 +756,30 @@
         });
 
         if(currentEditingTeacherIndex !== -1) {
-            teachersDatabase[currentEditingTeacherIndex] = { name, workloads: [...temporaryWorkloads], availability: avail };
+            teachersDatabase[currentEditingTeacherIndex] = { name, priority, workloads: [...temporaryWorkloads], availability: avail };
         } else {
-            if(teachersDatabase.find(t => t.name.toUpperCase() === name.toUpperCase())) return alert("Já existe.");
-            teachersDatabase.push({ name, workloads: [...temporaryWorkloads], availability: avail });
+            if(teachersDatabase.find(t => t.name.toUpperCase() === name.toUpperCase())) return alert("Professor já existe na base.");
+            teachersDatabase.push({ name, priority, workloads: [...temporaryWorkloads], availability: avail });
         }
-        updateTeachersListUI(); clearAvailabilityForm();
+        updateTeachersListUI(); 
+        clearAvailabilityForm();
     }
 
     function updateTeachersListUI() {
         document.getElementById("count-prof").innerText = teachersDatabase.length;
+        
+        teachersDatabase.sort((a, b) => (a.priority || 99) - (b.priority || 99));
+        
         const container = document.getElementById("teachers-list");
         container.innerHTML = "";
+        
         teachersDatabase.forEach((t, idx) => {
-            let tags = t.workloads.map(w => `<span class="workload-tag">${w.classInstance}: ${w.subject} (${w.weeklyLessons}h)</span>`).join('');
+            let tags = t.workloads.map(w => `<span class="workload-tag" style="padding: 2px 6px; font-size:0.7rem;">${w.classInstance}: ${w.subject}</span>`).join('');
+            let badgePrioridade = `<span class="workload-tag" style="background:#fef08a; border-color:#fde047; color:#854d0e; padding: 2px 6px; margin-left: 5px;">⭐ Prio: ${t.priority || 99}</span>`;
+            
             container.innerHTML += `
                 <div class="list-item">
-                    <strong>${t.name}</strong> 
+                    <strong>${t.name}</strong> ${badgePrioridade}
                     <button class="remove-btn" style="right: 80px; background: #0ea5e9;" onclick="loadTeacherToEdit(${idx})">Editar</button>
                     <button class="remove-btn" onclick="teachersDatabase.splice(${idx},1); updateTeachersListUI();">Excluir</button>
                     <br><div style="margin-top:6px">${tags}</div>
@@ -727,7 +790,12 @@
     function clearAvailabilityForm() {
         currentEditingTeacherIndex = -1;
         document.getElementById("prof-name").value = "";
-        temporaryWorkloads = []; renderTemporaryWorkloadsUI();
+        document.getElementById("prof-priority").value = "1";
+        document.getElementById("bulk-subject").value = "";
+        document.getElementById("bulk-qty").value = "2";
+        document.querySelectorAll(".bulk-class-cb").forEach(cb => cb.checked = false);
+        temporaryWorkloads = []; 
+        renderTemporaryWorkloadsUI();
         document.querySelectorAll("#table-availability input[type='checkbox']").forEach(c => c.checked = false);
     }
     
@@ -735,11 +803,43 @@
         currentEditingTeacherIndex = idx;
         let t = teachersDatabase[idx];
         document.getElementById("prof-name").value = t.name;
-        temporaryWorkloads = [...t.workloads];
+        document.getElementById("prof-priority").value = t.priority || 99;
+        
+        let loadedWorkloads = [...t.workloads];
+        
+        if (loadedWorkloads.length > 0) {
+            let mainSubject = loadedWorkloads[0].subject;
+            let mainQty = loadedWorkloads[0].weeklyLessons;
+            
+            document.getElementById("bulk-subject").value = mainSubject;
+            document.getElementById("bulk-qty").value = mainQty;
+            
+            document.querySelectorAll(".bulk-class-cb").forEach(cb => cb.checked = false);
+            let remainingWorkloads = [];
+            
+            loadedWorkloads.forEach(w => {
+                if (w.subject === mainSubject && w.weeklyLessons === mainQty) {
+                    let cb = document.querySelector(`.bulk-class-cb[value="${w.classInstance}"]`);
+                    if (cb) cb.checked = true;
+                } else {
+                    remainingWorkloads.push(w);
+                }
+            });
+            temporaryWorkloads = remainingWorkloads;
+        } else {
+            document.getElementById("bulk-subject").value = "";
+            document.getElementById("bulk-qty").value = "2";
+            document.querySelectorAll(".bulk-class-cb").forEach(cb => cb.checked = false);
+            temporaryWorkloads = [];
+        }
+        
         renderTemporaryWorkloadsUI();
+
         document.querySelectorAll("#table-availability input[type='checkbox']").forEach(cb => {
             cb.checked = t.availability[cb.getAttribute("data-day")]?.includes(cb.getAttribute("data-slot"));
         });
+        
+        document.getElementById("prof-name").scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     function isSlotValidForClass(slot, cShift, cExitTime) {
@@ -770,9 +870,6 @@
         return countAllocatedSubject(className, subject) < limitObj.maxLessons;
     }
 
-    // ==========================================
-    // FUNÇÕES AUXILIARES DE RESTRIÇÕES PEDAGÓGICAS
-    // ==========================================
     function countSubjectInDay(className, day, subject) {
         let count = 0;
         const upperSubj = subject.toUpperCase();
@@ -785,15 +882,6 @@
         return count;
     }
 
-    function hasWindow(teacherName, day, slotId) {
-        // Lógica conceitual: verifica se alocar esta aula criará um buraco na agenda do professor neste dia
-        // (Pode ser usada para ordenar a preferência dos slots)
-        return false; // Simplificado para o protótipo
-    }
-
-    // ==========================================
-    // ALGORITMO DE DISTRIBUIÇÃO OTIMIZADO
-    // ==========================================
     function generateSchedules() {
         if(activeClassInstances.length === 0 || teachersDatabase.length === 0) return alert("Sem dados preenchidos.");
 
@@ -815,31 +903,27 @@
             raw: t
         })));
 
-        // MELHORIA 1: Ordenar professores pela maior carga horária pendente (Priorização)
-        remaining.sort((a, b) => b.left - a.left);
+        remaining.sort((a, b) => {
+            const prioA = a.raw.priority !== undefined ? a.raw.priority : 99;
+            const prioB = b.raw.priority !== undefined ? b.raw.priority : 99;
+            if (prioA !== prioB) return prioA - prioB;
+            return b.left - a.left;
+        });
 
-        // Passo 1: Tenta alocar respeitando preferência de turmas, sem exceder 2 aulas por dia da mesma disciplina
         DAYS.forEach(day => {
             TIME_SLOTS.forEach(slot => {
                 if (slot.type !== "aula") return;
-
                 activeClassInstances.forEach(c => {
                     if(!isSlotValidForClass(slot, c.shift, c.exitTime)) return;
-
                     let cand = remaining.filter(w => w.cInst === c.name && w.left > 0 && w.raw.availability[day]?.includes(slot.id));
-
                     let profBusy = (profName) => {
                         for(let cl of activeClassInstances) if(masterSchedule[cl.name][day][slot.id]?.teacher === profName) return true;
                         return false;
                     };
-
                     for(let candidate of cand) {
                         if(!profBusy(candidate.tName)) {
                             if (!canAddSubjectToClass(c.name, candidate.sub)) continue;
-
-                            // MELHORIA 2: Limite máximo de 2 aulas da mesma disciplina no mesmo dia para a turma
                             if (countSubjectInDay(c.name, day, candidate.sub) >= 2) continue;
-
                             masterSchedule[c.name][day][slot.id] = { teacher: candidate.tName, subject: candidate.sub, pref: true };
                             candidate.left--;
                             break; 
@@ -849,7 +933,6 @@
             });
         });
 
-        // Passo 2: Fallback (Alocação de Contingência/Tapa-Buracos)
         let stillRemaining = remaining.filter(w => w.left > 0);
         for (let w of stillRemaining) {
             let allocatedInPass2 = true;
@@ -871,8 +954,6 @@
                         for (let c of activeClassInstances) {
                             if (!isSlotValidForClass(slot, c.shift, c.exitTime)) continue;
                             if (!canAddSubjectToClass(c.name, w.sub)) continue;
-
-                            // Limite de 2 aulas diárias mantido na contingência
                             if (countSubjectInDay(c.name, day, w.sub) >= 2) continue;
 
                             if (!masterSchedule[c.name][day][slot.id]) {
@@ -896,7 +977,6 @@
         document.getElementById("select-preview-teacher").innerHTML = teachersDatabase.map(t => `<option value="${t.name}">${t.name}</option>`).join('');
         renderTeacherPreview();
 
-        // Melhoria 3: O Validation Report mostrará as falhas após a execução
         generateValidationReport(remaining);
     }
 
@@ -905,27 +985,229 @@
             alert("Por favor, distribua as aulas (gere a grade) antes de emitir o relatório.");
             return;
         }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ orientation: 'landscape' });
+        let currentY = 20;
 
+        doc.setFontSize(16); doc.text("Relatório Geral de Turmas e Professores", 14, currentY); currentY += 10;
+        const dataAtual = new Date();
+        const dataFormatada = dataAtual.toLocaleDateString('pt-BR') + ' às ' + dataAtual.toLocaleTimeString('pt-BR');
+        doc.setFontSize(10); doc.text(`Gerado em: ${dataFormatada}`, 14, currentY); currentY += 15;
+
+        doc.setFontSize(14); doc.text("1. Grade de Horários por Turma", 14, currentY); currentY += 10;
+
+        activeClassInstances.forEach((cls, index) => {
+            const relevantSlots = TIME_SLOTS.filter(s => {
+                if(s.type === "inativo") return false; 
+                if (cls.shift === "Manhã") return s.shift === "Manhã" || (s.type === "intervalo" && s.id === "I1");
+                if (cls.shift === "Tarde") return (s.shift === "Tarde" || s.id === "I2") && !(END_TIMES[s.id] > cls.exitTime);
+                if (cls.shift === "Noite") return s.shift === "Noite" || s.type === "intervalo_eja";
+                if (cls.shift === "Integral") return s.shift !== "Noite" && s.id !== "IE" && !(END_TIMES[s.id] && END_TIMES[s.id] > cls.exitTime);
+                return true;
+            });
+            if (relevantSlots.length === 0) return;
+
+            let head = [['Dia', ...relevantSlots.map(s => {
+                if(s.type === 'intervalo' || s.type === 'intervalo_eja') return 'REC';
+                if(s.id === 'AL') return 'ALMOÇO';
+                return `${s.id}\n${s.label}`;
+            })]];
+
+            let body = DAYS.map(d => {
+                let row = [d];
+                relevantSlots.forEach(s => {
+                    if (s.type === 'intervalo' || s.type === 'intervalo_eja' || s.id === 'AL') {
+                        row.push("---");
+                    } else {
+                        let aula = masterSchedule[cls.name]?.[d]?.[s.id];
+                        if (aula) row.push(`${aula.subject}\n(${aula.teacher})`); else row.push("VAGO");
+                    }
+                });
+                return row;
+            });
+
+            doc.setFontSize(12); doc.text(`Turma: ${cls.name} (${cls.shift})`, 14, currentY);
+            doc.autoTable({
+                startY: currentY + 5, head: head, body: body, theme: 'grid',
+                headStyles: { fillColor: [79, 70, 229], halign: 'center', valign: 'middle' },
+                styles: { fontSize: 8, cellPadding: 2, halign: 'center', valign: 'middle' },
+                columnStyles: { 0: { fontStyle: 'bold', fillColor: [241, 245, 249], textColor: [30, 41, 59] } }, 
+                margin: { bottom: 20 }
+            });
+            currentY = doc.lastAutoTable.finalY + 15;
+            if (currentY > 160 && index < activeClassInstances.length - 1) { doc.addPage(); currentY = 20; }
+        });
+
+        doc.addPage(); currentY = 20; doc.setFontSize(14);
+        doc.text("2. Localização e Status dos Professores (Tempo Real)", 14, currentY); currentY += 10;
+
+        const dayOfWeek = dataAtual.getDay(); 
+        let currentDayStr = (dayOfWeek >= 1 && dayOfWeek <= 5) ? DAYS[dayOfWeek - 1] : "";
+        const currentMinutes = dataAtual.getHours() * 60 + dataAtual.getMinutes();
+        let currentSlotId = null, currentSlotLabel = "";
+
+        for (let s of TIME_SLOTS) {
+            if (s.type === 'inativo') continue;
+            let match = s.label.match(/(\d{2}):(\d{2})-(\d{2}):(\d{2})/);
+            if (match) {
+                let start = parseInt(match[1])*60 + parseInt(match[2]);
+                let end = parseInt(match[3])*60 + parseInt(match[4]);
+                if (currentMinutes >= start && currentMinutes <= end) {
+                    currentSlotId = s.id; currentSlotLabel = s.label; break;
+                }
+            }
+        }
+
+        doc.setFontSize(10);
+        if (currentDayStr && currentSlotId) doc.text(`O status abaixo foi calculado para agora: ${currentDayStr}, horário de ${currentSlotLabel}.`, 14, currentY);
+        else doc.text(`Status apurado: Estamos fora do horário letivo normal no momento da emissão deste relatório.`, 14, currentY);
+        currentY += 10;
+
+        let profBody = [];
+        let professoresOrdenados = [...teachersDatabase].sort((a, b) => a.name.localeCompare(b.name));
+        professoresOrdenados.forEach(t => {
+            let status = "Fora de Turno / Ausente", subject = "-";
+            if (currentDayStr && currentSlotId) {
+                let foundClass = null;
+                for (let cName in masterSchedule) {
+                    if (masterSchedule[cName]?.[currentDayStr]?.[currentSlotId]?.teacher === t.name) {
+                        foundClass = cName; subject = masterSchedule[cName][currentDayStr][currentSlotId].subject; break;
+                    }
+                }
+                if (foundClass) status = `Em Aula na Turma: ${foundClass}`;
+                else if (t.availability[currentDayStr]?.includes(currentSlotId)) status = "Em Janela (Disponível na escola)";
+            }
+            profBody.push([t.name, subject, status]);
+        });
+
+        doc.autoTable({
+            startY: currentY, head: [['Professor', 'Disciplina Atual', 'Localização / Status']],
+            body: profBody, theme: 'striped', headStyles: { fillColor: [5, 150, 105] }, styles: { fontSize: 10 } 
+        });
+        doc.save("Relatorio_Secretaria_Escolar.pdf");
+    }
+
+    function gerarPDFTodosProfessores() {
+        if (Object.keys(masterSchedule).length === 0) {
+            alert("Por favor, distribua as aulas (gere a grade) antes de emitir o relatório.");
+            return;
+        }
+        
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF({ orientation: 'landscape' });
         let currentY = 20;
 
         doc.setFontSize(16);
-        doc.text("Relatório Geral de Turmas e Professores", 14, currentY);
+        doc.text("Horários Individuais - Todos os Professores", 14, currentY);
         currentY += 10;
+
+        let professoresOrdenados = [...teachersDatabase].sort((a, b) => a.name.localeCompare(b.name));
+
+        professoresOrdenados.forEach((tObj, index) => {
+            let activeShifts = new Set();
+            
+            DAYS.forEach(d => {
+                TIME_SLOTS.forEach(s => {
+                    for (let cName in masterSchedule) {
+                        if (masterSchedule[cName]?.[d]?.[s.id]?.teacher === tObj.name) {
+                            if (s.shift) activeShifts.add(s.shift);
+                        }
+                    }
+                });
+            });
+
+            if (activeShifts.size === 0) {
+                DAYS.forEach(d => tObj.availability[d]?.forEach(sId => { 
+                    let s = TIME_SLOTS.find(x => x.id === sId); 
+                    if(s?.shift) activeShifts.add(s.shift); 
+                }));
+            }
+            
+            if (activeShifts.size === 0) return; 
+
+            const relevantSlots = TIME_SLOTS.filter(s => {
+                if(s.type === "inativo") return false;
+                if(s.type === "aula" && activeShifts.has(s.shift)) return true;
+                if(s.id === "I1" && activeShifts.has("Manhã")) return true;
+                if(s.id === "I2" && activeShifts.has("Tarde")) return true;
+                if(s.id === "IE" && activeShifts.has("Noite")) return true;
+                return s.id === "AL" && activeShifts.has("Manhã") && activeShifts.has("Tarde");
+            });
+
+            if (relevantSlots.length === 0) return;
+
+            let head = [['Dia', ...relevantSlots.map(s => {
+                if(s.type === 'intervalo' || s.type === 'intervalo_eja') return 'REC';
+                if(s.id === 'AL') return 'ALMOÇO';
+                return `${s.id}\n${s.label}`;
+            })]];
+
+            let body = DAYS.map(d => {
+                let row = [d];
+                relevantSlots.forEach(s => {
+                    if (s.type === 'intervalo' || s.type === 'intervalo_eja' || s.id === 'AL') {
+                        row.push("---");
+                    } else {
+                        let assignedClass = null, assignedSubject = null, isFallback = false;
+                        for (let cName in masterSchedule) {
+                            if (masterSchedule[cName]?.[d]?.[s.id]?.teacher === tObj.name) {
+                                assignedClass = cName; 
+                                assignedSubject = masterSchedule[cName][d][s.id].subject; 
+                                isFallback = masterSchedule[cName][d][s.id].pref === false; 
+                                break;
+                            }
+                        }
+                        if (assignedClass) {
+                            let text = `${assignedClass}\n${assignedSubject}`;
+                            if (isFallback) text += ' (Contingência)';
+                            row.push(text);
+                        } else {
+                            if (tObj.availability[d]?.includes(s.id)) {
+                                row.push("JANELA");
+                            } else {
+                                row.push("INDISP.");
+                            }
+                        }
+                    }
+                });
+                return row;
+            });
+
+            doc.setFontSize(12);
+            doc.text(`Professor(a): ${tObj.name}`, 14, currentY);
+            
+            doc.autoTable({
+                startY: currentY + 5,
+                head: head,
+                body: body,
+                theme: 'grid',
+                headStyles: { fillColor: [22, 163, 74], halign: 'center', valign: 'middle' }, 
+                styles: { fontSize: 8, cellPadding: 2, halign: 'center', valign: 'middle' },
+                columnStyles: { 0: { fontStyle: 'bold', fillColor: [240, 253, 244], textColor: [22, 163, 74] } }, 
+                margin: { bottom: 20 }
+            });
+
+            currentY = doc.lastAutoTable.finalY + 15;
+            
+            if (currentY > 160 && index < professoresOrdenados.length - 1) {
+                doc.addPage();
+                currentY = 20;
+            }
+        });
+
+        doc.save("Horarios_Todos_Professores.pdf");
+    }
+
+    // NOVA FUNÇÃO: Exportar CSV
+    function exportarCSV() {
+        if (Object.keys(masterSchedule).length === 0) {
+            alert("Por favor, gere a grade antes de exportar.");
+            return;
+        }
+
+        let csvContent = "\uFEFF"; // BOM para acentos abrirem corretos no Excel
         
-        const dataAtual = new Date();
-        const dataFormatada = dataAtual.toLocaleDateString('pt-BR') + ' às ' + dataAtual.toLocaleTimeString('pt-BR');
-        doc.setFontSize(10);
-        doc.text(`Gerado em: ${dataFormatada}`, 14, currentY);
-        currentY += 15;
-
-        doc.setFontSize(14);
-        doc.text("1. Grade de Horários por Turma", 14, currentY);
-        currentY += 10;
-
-        activeClassInstances.forEach((cls, index) => {
-            // Filtra apenas os slots relevantes para o turno da turma, incluindo intervalos
+        activeClassInstances.forEach(cls => {
             const relevantSlots = TIME_SLOTS.filter(s => {
                 if(s.type === "inativo") return false; 
                 if (cls.shift === "Manhã") return s.shift === "Manhã" || (s.type === "intervalo" && s.id === "I1");
@@ -937,137 +1219,114 @@
 
             if (relevantSlots.length === 0) return;
 
-            // Invertendo Eixos: Dias nas linhas, Horários nas Colunas
-            let head = [['Dia', ...relevantSlots.map(s => {
+            csvContent += `Turma: ${cls.name} (${cls.shift})\n`;
+            
+            let head = ['Dia', ...relevantSlots.map(s => {
                 if(s.type === 'intervalo' || s.type === 'intervalo_eja') return 'REC';
                 if(s.id === 'AL') return 'ALMOÇO';
-                return `${s.id}\n${s.label}`;
-            })]];
+                return `${s.id} (${s.label})`;
+            })];
+            csvContent += head.join(";") + "\n";
 
-            let body = DAYS.map(d => {
-                let row = [d]; // A primeira coluna é o dia da semana
+            DAYS.forEach(d => {
+                let row = [d];
                 relevantSlots.forEach(s => {
                     if (s.type === 'intervalo' || s.type === 'intervalo_eja' || s.id === 'AL') {
                         row.push("---");
                     } else {
                         let aula = masterSchedule[cls.name]?.[d]?.[s.id];
                         if (aula) {
-                            row.push(`${aula.subject}\n(${aula.teacher})`);
+                            row.push(`${aula.subject} - ${aula.teacher}`);
                         } else {
                             row.push("VAGO");
                         }
                     }
                 });
-                return row;
+                csvContent += row.join(";") + "\n";
             });
-
-            doc.setFontSize(12);
-            doc.text(`Turma: ${cls.name} (${cls.shift})`, 14, currentY);
-            
-            doc.autoTable({
-                startY: currentY + 5,
-                head: head,
-                body: body,
-                theme: 'grid',
-                headStyles: { fillColor: [79, 70, 229], halign: 'center', valign: 'middle' },
-                styles: { fontSize: 8, cellPadding: 2, halign: 'center', valign: 'middle' },
-                columnStyles: { 0: { fontStyle: 'bold', fillColor: [241, 245, 249], textColor: [30, 41, 59] } }, // Destaca a coluna dos dias
-                margin: { bottom: 20 }
-            });
-
-            // Atualiza o currentY baseado na última tabela gerada para colocar a próxima turma logo abaixo
-            currentY = doc.lastAutoTable.finalY + 15;
-
-            // A altura da página A4 em paisagem é de aprox. 210mm. Se o currentY passar de 160, criamos nova página.
-            if (currentY > 160 && index < activeClassInstances.length - 1) {
-                doc.addPage();
-                currentY = 20; 
-            }
+            csvContent += "\n";
         });
 
-        // Relatório de professores (página separada no final)
-        doc.addPage();
-        currentY = 20;
-        doc.setFontSize(14);
-        doc.text("2. Localização e Status dos Professores (Tempo Real)", 14, currentY);
-        currentY += 10;
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute("download", "Grade_Horarios.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
 
-        const dayOfWeek = dataAtual.getDay(); 
-        let currentDayStr = "";
-        if (dayOfWeek >= 1 && dayOfWeek <= 5) {
-            currentDayStr = DAYS[dayOfWeek - 1]; 
-        }
-        
-        const currentMinutes = dataAtual.getHours() * 60 + dataAtual.getMinutes();
-        let currentSlotId = null;
-        let currentSlotLabel = "";
-
-        for (let s of TIME_SLOTS) {
-            if (s.type === 'inativo') continue;
-            let match = s.label.match(/(\d{2}):(\d{2})-(\d{2}):(\d{2})/);
-            if (match) {
-                let start = parseInt(match[1])*60 + parseInt(match[2]);
-                let end = parseInt(match[3])*60 + parseInt(match[4]);
-                if (currentMinutes >= start && currentMinutes <= end) {
-                    currentSlotId = s.id;
-                    currentSlotLabel = s.label;
-                    break;
-                }
-            }
+    // NOVA FUNÇÃO: Exportar DOC (Word)
+    function exportarDOC() {
+        if (Object.keys(masterSchedule).length === 0) {
+            alert("Por favor, gere a grade antes de exportar.");
+            return;
         }
 
-        doc.setFontSize(10);
-        if (currentDayStr && currentSlotId) {
-            doc.text(`O status abaixo foi calculado para agora: ${currentDayStr}, horário de ${currentSlotLabel}.`, 14, currentY);
-        } else {
-            doc.text(`Status apurado: Estamos fora do horário letivo normal no momento da emissão deste relatório.`, 14, currentY);
-        }
-        currentY += 10;
+        let html = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>";
+        html += "<head><meta charset='utf-8'><title>Grade de Horários</title>";
+        html += "<style>table { border-collapse: collapse; width: 100%; text-align: center; font-family: sans-serif; font-size: 12px; } th, td { border: 1px solid #000; padding: 6px; } th { background-color: #f1f5f9; }</style>";
+        html += "</head><body>";
+        html += "<h1 style='text-align:center; font-family: sans-serif; color: #4f46e5;'>Grade de Horários Escolares</h1><hr>";
 
-        let profBody = [];
-        let professoresOrdenados = [...teachersDatabase].sort((a, b) => a.name.localeCompare(b.name));
+        activeClassInstances.forEach(cls => {
+            const relevantSlots = TIME_SLOTS.filter(s => {
+                if(s.type === "inativo") return false; 
+                if (cls.shift === "Manhã") return s.shift === "Manhã" || (s.type === "intervalo" && s.id === "I1");
+                if (cls.shift === "Tarde") return (s.shift === "Tarde" || s.id === "I2") && !(END_TIMES[s.id] > cls.exitTime);
+                if (cls.shift === "Noite") return s.shift === "Noite" || s.type === "intervalo_eja";
+                if (cls.shift === "Integral") return s.shift !== "Noite" && s.id !== "IE" && !(END_TIMES[s.id] && END_TIMES[s.id] > cls.exitTime);
+                return true;
+            });
 
-        professoresOrdenados.forEach(t => {
-            let status = "Fora de Turno / Ausente";
-            let subject = "-";
+            if (relevantSlots.length === 0) return;
+
+            html += `<h2 style='font-family: sans-serif; color: #1e293b; margin-top: 30px;'>Turma: ${cls.name} (${cls.shift})</h2>`;
+            html += `<table><thead><tr><th>Dia</th>`;
             
-            if (currentDayStr && currentSlotId) {
-                let foundClass = null;
-                for (let cName in masterSchedule) {
-                    if (masterSchedule[cName]?.[currentDayStr]?.[currentSlotId]?.teacher === t.name) {
-                        foundClass = cName;
-                        subject = masterSchedule[cName][currentDayStr][currentSlotId].subject;
-                        break;
+            relevantSlots.forEach(s => {
+                if(s.type === 'intervalo' || s.type === 'intervalo_eja') html += `<th>REC</th>`;
+                else if(s.id === 'AL') html += `<th>ALMOÇO</th>`;
+                else html += `<th>${s.id}<br>${s.label}</th>`;
+            });
+            html += `</tr></thead><tbody>`;
+
+            DAYS.forEach(d => {
+                html += `<tr><td><strong>${d}</strong></td>`;
+                relevantSlots.forEach(s => {
+                    if (s.type === 'intervalo' || s.type === 'intervalo_eja' || s.id === 'AL') {
+                        html += `<td style='background-color:#f8fafc;'>---</td>`;
+                    } else {
+                        let aula = masterSchedule[cls.name]?.[d]?.[s.id];
+                        if (aula) {
+                            html += `<td><strong>${aula.subject}</strong><br><em>${aula.teacher}</em></td>`;
+                        } else {
+                            html += `<td style='color:red;'>VAGO</td>`;
+                        }
                     }
-                }
-                
-                if (foundClass) {
-                    status = `Em Aula na Turma: ${foundClass}`;
-                } else if (t.availability[currentDayStr]?.includes(currentSlotId)) {
-                    status = "Em Janela (Disponível na escola)";
-                }
-            }
-            profBody.push([t.name, subject, status]);
+                });
+                html += `</tr>`;
+            });
+            html += `</tbody></table><br clear=all style='mso-special-character:line-break;page-break-before:always'>`;
         });
 
-        doc.autoTable({
-            startY: currentY,
-            head: [['Professor', 'Disciplina Atual', 'Localização / Status']],
-            body: profBody,
-            theme: 'striped',
-            headStyles: { fillColor: [5, 150, 105] }, 
-            styles: { fontSize: 10 } 
-        });
+        html += "</body></html>";
 
-        doc.save("Relatorio_Secretaria_Escolar.pdf");
+        let blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+        let downloadLink = document.createElement("a");
+        document.body.appendChild(downloadLink);
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = 'Grade_Horarios.doc';
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
     }
 
     function generateValidationReport(remainingData) {
         let teacherIssues = [];
         remainingData.forEach(r => {
-            if (r.left > 0) {
-                teacherIssues.push(`Mesmo usando outras turmas, o docente <b>${r.tName}</b> ficou com <b>${r.left}</b> aula(s) pendente(s) [${r.sub}].`);
-            }
+            if (r.left > 0) teacherIssues.push(`Mesmo usando outras turmas, o docente <b>${r.tName}</b> ficou com <b>${r.left}</b> aula(s) pendente(s) [${r.sub}].`);
         });
 
         let classIssues = [];
@@ -1091,12 +1350,8 @@
         }
 
         let html = `<div style="background: #fffbeb; border: 1px solid #fde68a; padding: 20px; border-radius: 8px; color: #92400e; margin-top: 20px;"><h3 style="color: #b45309; font-weight:800; margin-bottom:12px;">⚠️ Relatório de Inconsistências Detectadas</h3>`;
-        if (teacherIssues.length > 0) {
-            html += `<b>👨‍🏫 Carga Horária Não Alocada:</b><ul style="margin-left:20px; margin-bottom:15px;">` + teacherIssues.map(i => `<li>${i}</li>`).join('') + `</ul>`;
-        }
-        if (classIssues.length > 0) {
-            html += `<b>🎓 Aulas Faltantes nas Turmas (Horários Vagos):</b><ul style="margin-left:20px;">` + classIssues.map(i => `<li>${i}</li>`).join('') + `</ul>`;
-        }
+        if (teacherIssues.length > 0) html += `<b>👨‍🏫 Carga Horária Não Alocada:</b><ul style="margin-left:20px; margin-bottom:15px;">` + teacherIssues.map(i => `<li>${i}</li>`).join('') + `</ul>`;
+        if (classIssues.length > 0) html += `<b>🎓 Aulas Faltantes nas Turmas (Horários Vagos):</b><ul style="margin-left:20px;">` + classIssues.map(i => `<li>${i}</li>`).join('') + `</ul>`;
         container.innerHTML = html + `</div>`;
     }
 
@@ -1128,29 +1383,22 @@
 
         let html = `<thead><tr><th>Dia</th>`;
         relevantSlots.forEach(s => {
-            if(s.type === 'intervalo' || s.type === 'intervalo_eja' || s.id === 'AL') {
-                html += `<th class="thin-header">${s.id}</th>`;
-            } else {
-                html += `<th>${s.id}<br><small>${s.label}</small></th>`;
-            }
+            if(s.type === 'intervalo' || s.type === 'intervalo_eja' || s.id === 'AL') html += `<th class="thin-header">${s.id}</th>`;
+            else html += `<th>${s.id}<br><small>${s.label}</small></th>`;
         });
         html += `</tr></thead><tbody>`;
         
         DAYS.forEach(d => {
             html += `<tr><td class="day-column-hdr">${d}</td>`;
             relevantSlots.forEach(s => {
-                if(s.type === 'intervalo' || s.type === 'intervalo_eja') {
-                    html += `<td class="vertical-break-cell">REC</td>`;
-                } else if(s.id === 'AL' && cls.shift === 'Integral') {
-                     html += `<td class="vertical-break-cell" style="background:#fef3c7 !important; color:#92400e; border-color: #fde68a !important;">ALMOÇO</td>`;
-                } else {
+                if(s.type === 'intervalo' || s.type === 'intervalo_eja') html += `<td class="vertical-break-cell">REC</td>`;
+                else if(s.id === 'AL' && cls.shift === 'Integral') html += `<td class="vertical-break-cell" style="background:#fef3c7 !important; color:#92400e; border-color: #fde68a !important;">ALMOÇO</td>`;
+                else {
                     let a = masterSchedule[sel]?.[d]?.[s.id];
                     if (a) {
                         let subjectDisplay = a.pref === false ? `${a.subject} <span class="fallback-icon">🔄</span>` : a.subject;
                         html += `<td><div class="schedule-box"><b>${subjectDisplay}</b><br><small>${a.teacher}</small></div></td>`;
-                    } else {
-                        html += `<td><div class="empty-box">VAGO</div></td>`;
-                    }
+                    } else html += `<td><div class="empty-box">VAGO</div></td>`;
                 }
             });
             html += `</tr>`;
@@ -1193,29 +1441,21 @@
 
         let html = `<thead><tr><th>Dia</th>`;
         relevantSlots.forEach(s => {
-            if(s.type === 'intervalo' || s.type === 'intervalo_eja' || s.id === 'AL') {
-                html += `<th class="thin-header">${s.id}</th>`;
-            } else {
-                html += `<th>${s.id}<br><small>${s.label}</small></th>`;
-            }
+            if(s.type === 'intervalo' || s.type === 'intervalo_eja' || s.id === 'AL') html += `<th class="thin-header">${s.id}</th>`;
+            else html += `<th>${s.id}<br><small>${s.label}</small></th>`;
         });
         html += `</tr></thead><tbody>`;
 
         DAYS.forEach(d => {
             html += `<tr><td class="day-column-hdr">${d}</td>`;
             relevantSlots.forEach(s => {
-                if(s.type === 'intervalo' || s.type === 'intervalo_eja') {
-                    html += `<td class="vertical-break-cell">REC</td>`;
-                } else if(s.id === 'AL') {
-                     html += `<td class="vertical-break-cell" style="background:#fef3c7 !important; color:#92400e; border-color: #fde68a !important;">ALMOÇO</td>`;
-                } else {
+                if(s.type === 'intervalo' || s.type === 'intervalo_eja') html += `<td class="vertical-break-cell">REC</td>`;
+                else if(s.id === 'AL') html += `<td class="vertical-break-cell" style="background:#fef3c7 !important; color:#92400e; border-color: #fde68a !important;">ALMOÇO</td>`;
+                else {
                     let assignedClass = null, assignedSubject = null, isFallback = false;
                     for (let cName in masterSchedule) {
                         if (masterSchedule[cName]?.[d]?.[s.id]?.teacher === sel) {
-                            assignedClass = cName; 
-                            assignedSubject = masterSchedule[cName][d][s.id].subject; 
-                            isFallback = masterSchedule[cName][d][s.id].pref === false;
-                            break;
+                            assignedClass = cName; assignedSubject = masterSchedule[cName][d][s.id].subject; isFallback = masterSchedule[cName][d][s.id].pref === false; break;
                         }
                     }
                     if (assignedClass) {
@@ -1223,11 +1463,8 @@
                         let borderColor = isFallback ? "#f59e0b" : "#0ea5e9";
                         html += `<td><div class="schedule-box" style="border-left-color:${borderColor};"><b>${classDisplay}</b><br><small>${assignedSubject}</small></div></td>`;
                     } else {
-                        if (tObj.availability[d]?.includes(s.id)) {
-                            html += `<td><div class="empty-box" style="background:#f0fdf4; border-color:#bbf7d0; color:#16a34a;">JANELA</div></td>`;
-                        } else {
-                            html += `<td><div class="empty-box" style="background:#f8fafc; border-color:#e2e8f0; color:#94a3b8; border-style:dotted;">INDISP.</div></td>`;
-                        }
+                        if (tObj.availability[d]?.includes(s.id)) html += `<td><div class="empty-box" style="background:#f0fdf4; border-color:#bbf7d0; color:#16a34a;">JANELA</div></td>`;
+                        else html += `<td><div class="empty-box" style="background:#f8fafc; border-color:#e2e8f0; color:#94a3b8; border-style:dotted;">INDISP.</div></td>`;
                     }
                 }
             });
